@@ -1,0 +1,17 @@
+{
+  "port": ":4040",
+  "env": "dev",
+  "db": {
+    "dsn": "postgres://postgres:postgres@localhost:5432/library?sslmode=disable",
+    "maxIdleConns": 10,
+    "maxOpenConns": 10,
+    "maxIdleTime": 10
+  },
+  "smtp": {
+    "host": "smtp.office365.com",
+    "port": 587,
+    "username": "",
+    "password": "",
+    "sender": ""
+  }
+}
