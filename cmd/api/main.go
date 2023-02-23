@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"time"
 
 	"github.com/Eldiai/go_library/config"
@@ -23,6 +24,7 @@ type application struct {
 	logger *jsonlog.Logger
 	mailer mailer.Mailer
 	models data.Models
+	wg     sync.WaitGroup
 }
 
 func main() {
