@@ -129,23 +129,3 @@ func (app *application) readCSV(qs url.Values, key string, defaultValue []string
 
 	return strings.Split(csv, ",")
 }
-
-//// readInt is a helper method on application type that reads a string value from the URL query
-//// string and converts it to an integer before returning. If no matching key is found then it
-//// returns the provided default value. If the value couldn't be converted to an integer, then we
-//// record an error message in the provided Validator instance, and return the default value.
-//func (app *application) readInt(qs url.Values, key string, defaultValue int, v *validator.Validator) int {
-//	s := qs.Get(key)
-//
-//	if s == "" {
-//		return defaultValue
-//	}
-//
-//	i, err := strconv.Atoi(s)
-//	if err != nil {
-//		v.AddError(key, "must be an integer value")
-//		return defaultValue
-//	}
-//
-//	return i
-//}

@@ -33,17 +33,6 @@ var (
 
 func GetConfig() *Config {
 	once.Do(func() {
-		//config.Port = 4000
-		//config.Env = "development"
-		//config.Db.Dsn = "postgres://postgres:postgres@localhost:5432/library?sslmode=disable"
-		//config.Db.MaxOpenConns = 25
-		//config.Db.MaxIdleConns = 25
-		//config.Db.MaxIdleTime = "15m"
-		//config.Smtp.Host = "smtp.office365.com"
-		//config.Smtp.Port = 587
-		//config.Smtp.Username = "" // change this
-		//config.Smtp.Password = "" // change this
-		//config.Smtp.Sender = ""   // change this
 		b, err := os.ReadFile("config/default.json")
 		if err != nil {
 			panic(err)
