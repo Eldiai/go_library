@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/Eldiai/go_library/config"
+	"github.com/Eldiai/go_library/internal/data"
 	"github.com/Eldiai/go_library/internal/jsonlog"
 	"github.com/Eldiai/go_library/internal/mailer"
 
@@ -21,14 +22,30 @@ type application struct {
 	config *config.Config
 	logger *jsonlog.Logger
 	mailer mailer.Mailer
+	models data.Models
 }
 
 func main() {
 	cfg := config.GetConfig()
+	logger := jsonlog.NewLogger(os.Stdout, jsonlog.LevelInfo)
+
+	db, err := openDB(cfg)
+	if err != nil {
+		logger.PrintFatal(err, nil)
+	}
+	defer func() {
+		err = db.Close()
+		if err != nil {
+			logger.PrintFatal(err, nil)
+		}
+	}()
+
+	logger.PrintInfo("database connection pool established", nil)
 
 	app := &application{
 		config: cfg,
-		logger: jsonlog.NewLogger(os.Stdout, jsonlog.LevelInfo),
+		logger: logger,
+		models: data.NewModels(db),
 		mailer: mailer.New(cfg.Smtp.Host, cfg.Smtp.Port, cfg.Smtp.Username, cfg.Smtp.Password, cfg.Smtp.Sender),
 	}
 
@@ -52,7 +69,7 @@ func main() {
 	<-quit
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	err := srv.Shutdown(ctx)
+	err = srv.Shutdown(ctx)
 	if err != nil {
 		app.logger.PrintFatal(err, nil)
 	}

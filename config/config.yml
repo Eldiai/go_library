@@ -1,0 +1,13 @@
+port: ":4040"
+env: "dev"
+db:
+  dsn: "postgres://postgres:postgres@localhost:5432/golibrary?sslmode=disable"
+  maxIdleConns: 10
+  maxOpenConns: 100
+  maxIdleTime: 15s
+smtp:
+  host: "smtp.office365.com"
+  port: 587
+  username:
+  password:
+  sender:

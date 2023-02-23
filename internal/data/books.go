@@ -4,8 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"github.com/lib/pq"
 	"time"
+
+	"github.com/Eldiai/go_library/internal/validator"
+	"github.com/lib/pq"
 )
 
 type Book struct {
@@ -128,4 +130,13 @@ WHERE id = $1`
 	}
 	return nil
 
+}
+
+func ValidateBook(v *validator.Validator, book *Book) {
+	v.Check(book.Title != "", "title", "must be provided")
+	v.Check(book.Author != "", "author", "must be provided")
+	v.Check(book.Year != 0, "year", "must be provided")
+	v.Check(book.ReleasedAt != 0, "released_at", "must be provided")
+	v.Check(len(book.Genres) > 0, "genres", "must be provided")
+	v.Check(book.Year <= int32(time.Now().Year()), "year", "must not be in the future")
 }
