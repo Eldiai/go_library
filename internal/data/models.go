@@ -16,7 +16,7 @@ type Models struct {
 		Get(id int64) (*Book, error)
 		Update(book *Book) error
 		Delete(id int64) error
-		//GetAll(title string, genres []string, filters Filters) ([]*Movie, Metadata, error)
+		GetAll(title string, author string, genres []string, filters Filters) ([]*Book, Metadata, error)
 	}
 	Users UserModel
 	//Tokens TokenModel

@@ -17,7 +17,7 @@ type Book struct {
 	Author     string    `json:"author"`
 	Year       int32     `json:"year,omitempty"`
 	Genres     []string  `json:"genres,omitempty"`
-	ReleasedAt int32     `json:"released_at"`
+	ReleasedAt int32     `json:"released_at,omitempty"`
 }
 
 type BookModel struct {
@@ -78,21 +78,21 @@ WHERE id = $1`
 func (b BookModel) Update(book *Book) error {
 	query := `
 UPDATE books
-SET title = $1, author = $2, year = $3, genres = $4, released_at = $5
-WHERE id = $6
-RETURNING title,author,year,genres,released_at`
+SET title = $1, author = $2, year = $3, genres = $4, released_at = $6
+WHERE id = $5
+RETURNING released_at`
 	args := []interface{}{
 		book.Title,
 		book.Author,
 		book.Year,
-		book.ReleasedAt,
 		pq.Array(book.Genres),
 		book.ID,
+		book.ReleasedAt,
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	err := b.DB.QueryRowContext(ctx, query, args...).Scan(&book.Title, &book.Author, &book.Year, &book.Genres, &book.ReleasedAt)
+	err := b.DB.QueryRowContext(ctx, query, args...).Scan(&book.ReleasedAt)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -141,20 +141,21 @@ func ValidateBook(v *validator.Validator, book *Book) {
 	v.Check(book.Year <= int32(time.Now().Year()), "year", "must not be in the future")
 }
 
-func (b BookModel) GetAll(title string, genres []string, filters Filters) ([]*Book, Metadata, error) {
+func (b BookModel) GetAll(title string, author string, genres []string, filters Filters) ([]*Book, Metadata, error) {
 
 	query := fmt.Sprintf(`
 SELECT count(*) OVER(), id, created_at, title,author, year, genres, released_at
 FROM books
-WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
-AND (genres @> $2 OR $2 = '{}')
+WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '') AND 
+      (to_tsvector('simple', author) @@ plainto_tsquery('simple', $2) OR $2 = '')
+AND (genres @> $3 OR $3 = '{}')
 ORDER BY %s %s, id ASC
-LIMIT $3 OFFSET $4`, filters.sortColumn(), filters.sortDirection())
+LIMIT $4 OFFSET $5`, filters.sortColumn(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	args := []interface{}{title, pq.Array(genres), filters.limit(), filters.offset()}
+	args := []interface{}{title, author, pq.Array(genres), filters.limit(), filters.offset()}
 
 	rows, err := b.DB.QueryContext(ctx, query, args...)
 	if err != nil {

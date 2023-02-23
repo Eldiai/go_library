@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/Eldiai/go_library/internal/validator"
 	"io"
 	"net/http"
 	"net/url"
@@ -24,8 +25,6 @@ func (app *application) readIDParam(r *http.Request) (int64, error) {
 	return id, nil
 }
 
-// writeJSON marshals data structure to encoded JSON response. It returns an error if there are
-// any issues, else error is nil.
 func (app *application) writeJSON(w http.ResponseWriter, status int, data envelope,
 	headers http.Header) error {
 	js, err := json.MarshalIndent(data, "", "\t")
@@ -49,8 +48,6 @@ func (app *application) writeJSON(w http.ResponseWriter, status int, data envelo
 	return nil
 }
 
-// readJSON decodes request Body into corresponding Go type. It triages for any potential errors
-// and returns corresponding appropriate errors.
 func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst interface{}) error {
 	maxBytes := 1_048_576
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
@@ -105,8 +102,6 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst int
 	return nil
 }
 
-// readString is a helper method on application type that returns a string value from the URL query
-// string, or the provided default value if no matching key is found.
 func (app *application) readStrings(qs url.Values, key string, defaultValue string) string {
 	s := qs.Get(key)
 
@@ -117,9 +112,6 @@ func (app *application) readStrings(qs url.Values, key string, defaultValue stri
 	return s
 }
 
-// readCSV is a helper method on application type that reads a string value from the URL query
-// string and then splits it into a slice on the comma character. If no matching key is found
-// then it returns the provided default value.
 func (app *application) readCSV(qs url.Values, key string, defaultValue []string) []string {
 	csv := qs.Get(key)
 
@@ -128,4 +120,27 @@ func (app *application) readCSV(qs url.Values, key string, defaultValue []string
 	}
 
 	return strings.Split(csv, ",")
+}
+
+func (app *application) readString(qs url.Values, key string, defaultValue string) string {
+	s := qs.Get(key)
+
+	if s == "" {
+		return defaultValue
+	}
+	return s
+
+}
+
+func (app *application) readInt(qs url.Values, key string, defaultValue int, v *validator.Validator) int {
+	s := qs.Get(key)
+	if s == "" {
+		return defaultValue
+	}
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		v.AddError(key, "must be an integer value")
+		return defaultValue
+	}
+	return i
 }

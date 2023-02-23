@@ -20,7 +20,7 @@ func (app *application) errorResponse(w http.ResponseWriter, r *http.Request, st
 	err := app.writeJSON(w, status, env, nil)
 	if err != nil {
 		app.logError(r, err)
-		w.WriteHeader(status)
+		w.WriteHeader(500)
 	}
 }
 
@@ -46,8 +46,7 @@ func (app *application) badRequestResponse(w http.ResponseWriter, r *http.Reques
 }
 
 func (app *application) failedValidationResponse(w http.ResponseWriter, r *http.Request, errors map[string]string) {
-	message := "a user with this email address already exists"
-	app.errorResponse(w, r, http.StatusUnprocessableEntity, message)
+	app.errorResponse(w, r, http.StatusUnprocessableEntity, errors)
 }
 
 func (app *application) editConflictResponse(w http.ResponseWriter, r *http.Request) {
