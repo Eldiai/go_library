@@ -4,7 +4,10 @@ run_postgres:
 migration_up:
 	migrate -path migrations -database "postgresql://postgres:postgres@localhost:5432/golibrary?sslmode=disable" -verbose up
 
+migration_down:
+	migrate -path migrations -database "postgresql://postgres:postgres@localhost:5432/golibrary?sslmode=disable" -verbose down
+
 run_app:
-	go run cmd/*
+	go run cmd/api/*.go
 
 .PHONY: run_postgres

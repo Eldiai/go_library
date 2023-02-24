@@ -60,6 +60,7 @@ func main() {
 	}
 
 	go func() {
+		app.logger.PrintInfo("starting server on "+cfg.Port, nil)
 		if err := srv.ListenAndServe(); err != nil {
 			app.logger.PrintFatal(err, nil)
 		}
